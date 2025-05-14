@@ -1,8 +1,5 @@
 import unittest
-
 from textnode import TextNode, TextType
-
-
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
         node = TextNode("This is a text node", TextType.BOLD)
@@ -21,7 +18,6 @@ class TestTextNode(unittest.TestCase):
         node5 = TextNode("Text node", TextType.IMAGE)
         node6 = TextNode("Text node", TextType.ITALIC, "")
         self.assertNotEqual(node5, node6)
-
 
 if __name__ == "__main__":
     unittest.main()
