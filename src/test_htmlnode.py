@@ -1,5 +1,6 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html_with_href(self):
@@ -22,6 +23,14 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("p", "Hello, world!")
         self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
 
+    def test_leaf_to_html_a(self):
+        node = LeafNode("a", "test", {"href":"https://www.google.com"})
+        self.assertEqual(node.to_html(),'<a href="https://www.google.com">test</a>')
+
+    def test_leaf_to_html_no_value(self):
+        node = LeafNode("p", None)
+        self.assertRaises(ValueError, node.to_html)
+        
     def test_leaf_to_html_no_tag(self):
         node = LeafNode(None, "Just some text")
         self.assertEqual(node.to_html(), "Just some text")
@@ -56,6 +65,12 @@ class TestHTMLNode(unittest.TestCase):
             parent_node.to_html(),
             "<div><span><b>grandchild</b></span></div>",
         )
+
+    def test_text(self):
+        node = TextNode("This is a text node", TextType.NORMAL)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
 
 if __name__ == "__main__":
     unittest.main()
