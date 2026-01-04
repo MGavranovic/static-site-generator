@@ -1,3 +1,5 @@
+from textnode import TextType, TextNode
+
 class HTMLNode:
     def __init__(self, tag = None, value = None, children = None, props = None):
         self.tag = tag
@@ -43,3 +45,40 @@ class ParentNode(HTMLNode):
         for c in self.children:
             children_html += c.to_html()
         return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
+    
+def text_node_to_html_node(text_node):
+    match text_node.text_type:
+        case TextType.NORMAL:
+             return LeafNode(None, f"{text_node.text}")
+        case TextType.BOLD:
+            return LeafNode("b", f"{text_node.text}")
+        case TextType.ITALIC:
+            return LeafNode("i", f"{text_node.text}")
+        case TextType.CODE:
+            return LeafNode("code", f"{text_node.text}")
+        case TextType.LINK:
+            return LeafNode("a", f"{text_node.text}", text_node.props)
+        case TextType.IMAGE:
+            props = []
+            for p in text_node.props:
+                props.append(p)
+            return LeafNode("img", "", [text_node.src, text_node.alt])
+
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    rtrn_list = []
+    for on in old_nodes:
+        if on.text_type != TextType.NORMAL:
+            rtrn_list.append(on)
+            continue
+        if on.text.count(delimiter) % 2 != 0:
+            raise SyntaxError("Incorrect Markdown syntax")
+        separated = on.text.split(delimiter)
+        for i, s in enumerate(separated):
+            if len(s) == 0:
+                continue
+            if i % 2 == 0:
+                rtrn_list.append(TextNode(s, TextType.NORMAL))
+            if i % 2 != 0:
+                rtrn_list.append(TextNode(s, text_type))
+    return rtrn_list        
+        

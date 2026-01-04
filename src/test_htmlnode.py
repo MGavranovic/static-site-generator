@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, split_nodes_delimiter
 from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
@@ -71,6 +71,51 @@ class TestHTMLNode(unittest.TestCase):
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "This is a text node")
+
+    def test_bold_delimiter(self):
+        node = TextNode("This is **bold** node", TextType.NORMAL)
+        split = split_nodes_delimiter([node], "**", TextType.BOLD)
+        self.assertEqual(
+            split, 
+            [ 
+                TextNode("This is ", TextType.NORMAL),
+                TextNode("bold", TextType.BOLD),
+                TextNode(" node", TextType.NORMAL),
+            ]
+        )
+
+    def test_code_delimiter(self):
+        node = TextNode("This is `code` node", TextType.NORMAL)
+        split = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(
+            split, 
+            [ 
+                TextNode("This is ", TextType.NORMAL),
+                TextNode("code", TextType.CODE),
+                TextNode(" node", TextType.NORMAL),
+            ]
+        )
+
+    def test_italic_delimiter(self):
+        node = TextNode("This is _code_ node", TextType.NORMAL)
+        split = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        self.assertEqual(
+            split, 
+            [ 
+                TextNode("This is ", TextType.NORMAL),
+                TextNode("code", TextType.ITALIC),
+                TextNode(" node", TextType.NORMAL),
+            ]
+        )
+
+    def test_node_not_normal_delimiter(self):
+        node = TextNode("This is a bold node", TextType.BOLD)
+        self.assertEqual(split_nodes_delimiter([node], "**", TextType.BOLD), [TextNode("This is a bold node", TextType.BOLD)])
+
+    def test_node_delimiter_not_closed(self):
+        node = TextNode("This is a **bold node", TextType.NORMAL)
+        with self.assertRaises(SyntaxError):  
+            split_nodes_delimiter([node], "**", TextType.BOLD)
 
 if __name__ == "__main__":
     unittest.main()
