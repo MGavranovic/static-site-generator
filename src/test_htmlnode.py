@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, split_nodes_delimiter
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, split_nodes_delimiter, extract_markdown_link, extract_markdown_images
 from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
@@ -116,6 +116,30 @@ class TestHTMLNode(unittest.TestCase):
         node = TextNode("This is a **bold node", TextType.NORMAL)
         with self.assertRaises(SyntaxError):  
             split_nodes_delimiter([node], "**", TextType.BOLD)
+    
+    def test_extract_markdown_images(self):
+        text = "This is md image ![image alt text](https://i.imgur.com/zjjcJKZ.png)"
+        self.assertListEqual(
+            [("image alt text", "https://i.imgur.com/zjjcJKZ.png")], extract_markdown_images(text)    
+        )
+
+    def test_extract_markdown_link(self):
+        text = "This is md link [link](https://www.boot.dev)"
+        self.assertListEqual(
+            [("link", "https://www.boot.dev")], 
+            extract_markdown_link(text)    
+        )
+
+    def test_extract_markdown_link_multiple(self):
+        text = "This is md link [link](https://www.boot.dev), This is md link2 [link2](https://www.boot.dev2)"
+        self.assertListEqual(
+            [
+                ("link", "https://www.boot.dev"),
+                ("link2", "https://www.boot.dev2")
+            ], 
+            extract_markdown_link(text)    
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
